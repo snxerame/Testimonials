@@ -320,29 +320,29 @@
             transform: scale(1.05);
         }
 
-        .delete-button {
+        .edit-button {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: rgba(255, 59, 48, 0.9);
+            background: rgba(255, 255, 255, 0.3);
             color: white;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.5);
             width: 36px;
             height: 36px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(255, 59, 48, 0.4);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
             z-index: 10;
         }
 
-        .delete-button:hover {
+        .edit-button:hover {
             transform: scale(1.15);
-            background: rgba(255, 59, 48, 1);
+            background: rgba(255, 255, 255, 0.4);
         }
 
         .modal {
@@ -483,6 +483,77 @@
             letter-spacing: 1px;
         }
 
+        .countdown-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            padding: 30px 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeInDown 1s ease 0.3s backwards;
+        }
+
+        .countdown-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .countdown-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 15px 20px;
+            min-width: 80px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .countdown-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+
+        .countdown-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .countdown-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            display: block;
+            margin-top: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.5rem;
@@ -500,6 +571,27 @@
             .modal-content {
                 padding: 30px;
                 margin: 20% auto;
+            }
+
+            .countdown-container {
+                padding: 20px;
+            }
+
+            .countdown-title {
+                font-size: 1.3rem;
+            }
+
+            .countdown-timer {
+                gap: 10px;
+            }
+
+            .countdown-box {
+                padding: 10px 15px;
+                min-width: 60px;
+            }
+
+            .countdown-value {
+                font-size: 1.8rem;
             }
         }
 
@@ -538,6 +630,28 @@
             <p class="subtitle">This Too Shall Pass~</p>
         </header>
 
+        <div class="countdown-container">
+            <div class="countdown-title">Portal Deadline</div>
+            <div class="countdown-timer">
+                <div class="countdown-box">
+                    <span class="countdown-value" id="days">00</span>
+                    <span class="countdown-label">Days</span>
+                </div>
+                <div class="countdown-box">
+                    <span class="countdown-value" id="hours">00</span>
+                    <span class="countdown-label">Hours</span>
+                </div>
+                <div class="countdown-box">
+                    <span class="countdown-value" id="minutes">00</span>
+                    <span class="countdown-label">Minutes</span>
+                </div>
+                <div class="countdown-box">
+                    <span class="countdown-value" id="seconds">00</span>
+                    <span class="countdown-label">Seconds</span>
+                </div>
+            </div>
+        </div>
+
         <center>
             <button class="add-button" onclick="openModal()">+ Add New Card</button>
         </center>
@@ -547,7 +661,7 @@
 
     <div id="modal" class="modal">
         <div class="modal-content">
-            <h2 class="modal-header">Create New Card</h2>
+            <h2 class="modal-header" id="modalTitle">Create New Card</h2>
             <form id="cardForm">
                 <div class="form-group">
                     <label for="name">Name</label>
@@ -559,7 +673,7 @@
                 </div>
                 <div class="modal-buttons">
                     <button type="button" class="modal-button secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="modal-button primary">Create Card</button>
+                    <button type="submit" class="modal-button primary" id="submitBtn">Create Card</button>
                 </div>
             </form>
         </div>
@@ -567,6 +681,7 @@
 
     <script>
         let cards = [];
+        let editingCardId = null;
 
         async function loadCards() {
             try {
@@ -594,18 +709,25 @@
             }
         }
 
-        async function deleteCardById(id) {
+        async function updateCard(id, name, link) {
             try {
-                const response = await fetch('/api/cards', {
+                // Delete old card and add new one with updated link
+                await fetch('/api/cards', {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id })
+                });
+
+                const response = await fetch('/api/cards', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, link })
                 });
                 const data = await response.json();
                 cards = data.cards || [];
                 renderCards();
             } catch (error) {
-                console.error('Error deleting card:', error);
+                console.error('Error updating card:', error);
             }
         }
 
@@ -635,7 +757,7 @@
                             <div class="card-label">Hover to reveal link</div>
                         </div>
                         <div class="card-face card-back">
-                            <button class="delete-button" onclick="deleteCard('${card.id}')" title="Delete card">×</button>
+                            <button class="edit-button" onclick="editCard('${card.id}', '${card.name.replace(/'/g, "\\'")}', '${card.link.replace(/'/g, "\\'")}'); event.stopPropagation();" title="Edit link">✎</button>
                             <a href="${card.link}" target="_blank" class="card-link" onclick="event.stopPropagation()">${card.link}</a>
                         </div>
                     </div>
@@ -644,6 +766,10 @@
         }
 
         function openModal() {
+            editingCardId = null;
+            document.getElementById('modalTitle').textContent = 'Create New Card';
+            document.getElementById('submitBtn').textContent = 'Create Card';
+            document.getElementById('name').disabled = false;
             document.getElementById('modal').style.display = 'block';
             createSparkles(event);
         }
@@ -651,12 +777,17 @@
         function closeModal() {
             document.getElementById('modal').style.display = 'none';
             document.getElementById('cardForm').reset();
+            editingCardId = null;
         }
 
-        async function deleteCard(id) {
-            if (confirm('Are you sure you want to delete this card?')) {
-                await deleteCardById(id);
-            }
+        function editCard(id, name, link) {
+            editingCardId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Link';
+            document.getElementById('submitBtn').textContent = 'Update Link';
+            document.getElementById('name').value = name;
+            document.getElementById('name').disabled = true;
+            document.getElementById('link').value = link.replace(/^https?:\/\//i, '');
+            document.getElementById('modal').style.display = 'block';
         }
 
         function createSparkles(event) {
@@ -686,7 +817,11 @@
                 link = 'https://' + link;
             }
 
-            await addCard(name, link);
+            if (editingCardId) {
+                await updateCard(editingCardId, name, link);
+            } else {
+                await addCard(name, link);
+            }
             closeModal();
         });
 
@@ -698,6 +833,35 @@
         }
 
         document.addEventListener('DOMContentLoaded', loadCards);
+
+        // Countdown Timer
+        function updateCountdown() {
+            const deadline = new Date('April 20, 2026 23:59:59').getTime();
+            const now = new Date().getTime();
+            const distance = deadline - now;
+
+            if (distance < 0) {
+                document.getElementById('days').textContent = '00';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        // Update countdown every second
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
     </script>
 </body>
 </html>
