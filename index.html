@@ -566,10 +566,47 @@
     </div>
 
     <script>
-        let cards = JSON.parse(localStorage.getItem('flipcards')) || [];
+        let cards = [];
 
-        function saveCards() {
-            localStorage.setItem('flipcards', JSON.stringify(cards));
+        async function loadCards() {
+            try {
+                const response = await fetch('/api/cards');
+                const data = await response.json();
+                cards = data.cards || [];
+                renderCards();
+            } catch (error) {
+                console.error('Error loading cards:', error);
+            }
+        }
+
+        async function addCard(name, link) {
+            try {
+                const response = await fetch('/api/cards', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, link })
+                });
+                const data = await response.json();
+                cards = data.cards || [];
+                renderCards();
+            } catch (error) {
+                console.error('Error adding card:', error);
+            }
+        }
+
+        async function deleteCardById(id) {
+            try {
+                const response = await fetch('/api/cards', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                const data = await response.json();
+                cards = data.cards || [];
+                renderCards();
+            } catch (error) {
+                console.error('Error deleting card:', error);
+            }
         }
 
         function getInitial(name) {
@@ -598,7 +635,7 @@
                             <div class="card-label">Hover to reveal link</div>
                         </div>
                         <div class="card-face card-back">
-                            <button class="delete-button" onclick="deleteCard(${index})" title="Delete card">×</button>
+                            <button class="delete-button" onclick="deleteCard('${card.id}')" title="Delete card">×</button>
                             <a href="${card.link}" target="_blank" class="card-link" onclick="event.stopPropagation()">${card.link}</a>
                         </div>
                     </div>
@@ -616,11 +653,9 @@
             document.getElementById('cardForm').reset();
         }
 
-        function deleteCard(index) {
+        async function deleteCard(id) {
             if (confirm('Are you sure you want to delete this card?')) {
-                cards.splice(index, 1);
-                saveCards();
-                renderCards();
+                await deleteCardById(id);
             }
         }
 
@@ -640,15 +675,13 @@
             }
         }
 
-        document.getElementById('cardForm').addEventListener('submit', function(e) {
+        document.getElementById('cardForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const name = document.getElementById('name').value.trim();
             const link = document.getElementById('link').value.trim();
 
-            cards.push({ name, link });
-            saveCards();
-            renderCards();
+            await addCard(name, link);
             closeModal();
         });
 
@@ -659,7 +692,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', renderCards);
+        document.addEventListener('DOMContentLoaded', loadCards);
     </script>
 </body>
 </html>
