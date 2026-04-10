@@ -1,0 +1,9 @@
+{
+  "name": "wingies-forever",
+  "version": "1.0.0",
+  "description": "Flipping cards website with Vercel KV storage",
+  "type": "module",
+  "dependencies": {
+    "@vercel/kv": "^1.0.0"
+  }
+}
