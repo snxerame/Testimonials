@@ -679,7 +679,12 @@
             e.preventDefault();
 
             const name = document.getElementById('name').value.trim();
-            const link = document.getElementById('link').value.trim();
+            let link = document.getElementById('link').value.trim();
+
+            // Add https:// if no protocol specified
+            if (link && !link.match(/^https?:\/\//i)) {
+                link = 'https://' + link;
+            }
 
             await addCard(name, link);
             closeModal();
