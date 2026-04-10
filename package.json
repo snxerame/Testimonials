@@ -4,6 +4,6 @@
   "description": "Flipping cards website with Vercel KV storage",
   "type": "module",
   "dependencies": {
-    "@vercel/kv": "^1.0.0"
+    "@vercel/kv": "^2.0.0"
   }
 }
